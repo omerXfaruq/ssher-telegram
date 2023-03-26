@@ -1,5 +1,6 @@
 import sys
 import os
+import subprocess as sp
 from httpx import AsyncClient
 from pyngrok import ngrok
 import asyncio
@@ -16,6 +17,8 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT"))
     chat_id = str(os.environ.get("CHATID"))
     ngrok_token = str(os.environ.get("NGROK_TOKEN"))
+    result = sp.run(["whoami"], capture_output=True)
+    username = result.stdout.decode('UTF-8')[:-1]
     ngrok.set_auth_token(ngrok_token)
     ssh_tunnel = ngrok.connect(port, "tcp")
     ssh_url_all = ssh_tunnel.public_url
@@ -29,7 +32,7 @@ if __name__ == "__main__":
             TELEGRAM_SEND_MESSAGE_URL,
             {
                 'chat_id': chat_id,
-                'text': f"ssh -p {ssh_port} ubuntu@{ssh_url}"
+                'text': f"ssh -p {ssh_port} {username}@{ssh_url}"
             },
         )
     )
